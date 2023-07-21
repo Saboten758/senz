@@ -4,8 +4,7 @@ const Home=()=>{
     return (
       <ScrollView>
           <View style={styles.main_container}>
-            <Text style={styles.texting}>WELCOME</Text>
-            <Text style={styles.texting}>TO</Text>
+            <Text style={styles.texting}>WELCOME TO</Text>
             <Text style={styles.texting}>SENZ</Text>
         </View>
         <View style={{alignItems:'center'}}>

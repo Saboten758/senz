@@ -1,21 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { ScrollViewComponent,ScrollView,StyleSheet, Text, TouchableHighlight, View } from "react-native";
+import { processColor,ScrollView,StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { magnetometer, setUpdateIntervalForType,SensorTypes } from "react-native-sensors";
 
 import {LineChart} from 'react-native-charts-wrapper';
 
-setUpdateIntervalForType(SensorTypes.magnetometer, 100);
+setUpdateIntervalForType(SensorTypes.magnetometer, 300);
 
 
 const Magno=()=>{
     const [but,setBut]=useState(false)
-    const [magno,setMagno]=useState({x:0,y:0,z:0,timestamp:0})
+    const [magno,setmagno]=useState({x:0,y:0,z:0,timestamp:0})
+    const [magnoDatax, setmagnoDatax] = useState([0]);
+    const [magnoDatay, setmagnoDatay] = useState([0]);
+    const [magnoDataz, setmagnoDataz] = useState([0]);
+
 
     useEffect(() => {
         const subscription = magnetometer.subscribe(({ x, y, z, timestamp }) => {
           if(but){
-            setMagno({ x, y, z, timestamp });
-              
+            setmagno({ x, y, z, timestamp });
+            setmagnoDatax((prevData) => [...prevData, x]);
+            setmagnoDatay((prevData) => [...prevData, y]);
+            setmagnoDataz((prevData) => [...prevData, z]);
           } 
         });
         
@@ -29,15 +35,27 @@ const Magno=()=>{
         <ScrollView>
             <View style={styles.container}>
                 <View style={styles.chart_containeer}>
-                <LineChart style={styles.chart}
-            data={{dataSets:[{label: "Magnometer", values: [{y:magno.x},{y:magno.y},{y:magno.z}] } ] }}/>
+                <LineChart
+            style={styles.chart}
+            data={{
+              dataSets: [{ label: "magno_X", values: magnoDatax.map((xVal, index) => ({ y: xVal, x: index })), config: {lineWidth: 4}},
+              { label: "magno_Y", values: magnoDatay.map((yVal, index) => ({ y: yVal, x: index })), config: {lineWidth: 4,color:processColor('red')}},
+              { label: "magno_Z", values: magnoDataz.map((zVal, index) => ({ y: zVal, x: index })), config: {lineWidth: 4,color:processColor('green')}}
+            ],
+            }}
+          />
                 </View>
            
             <Text style={styles.text}>magno_x: {magno.x}</Text>
                  <Text style={styles.text}>magno_y: {magno.x}</Text>
                 <Text style={styles.text}>magno_z: {magno.x}</Text>
                <Text style={styles.text}>TIMESTAMP: {magno.timestamp}</Text>
-              <TouchableHighlight style={styles.button}onPress={()=>{setBut(!but)}}><Text style={{color:'white'}}>HEWWO</Text></TouchableHighlight> 
+              <TouchableHighlight style={!but?styles.button:styles.button2}onPress={()=>{setBut(!but)}}><Text style={{color:'white'}}>{!but?"Start Logging":"Stop Logging"}</Text></TouchableHighlight> 
+              <TouchableHighlight style={styles.button3}onPress={()=>{
+                setmagno({x:0,y:0,z:0,timestamp:0});setmagnoDatax([0]);setmagnoDatay([0]);setmagnoDataz([0]);
+                }}>
+                    <Text style={{color:'white'}}>CLEAR</Text>
+                </TouchableHighlight> 
          </View>
         </ScrollView>
             
@@ -48,6 +66,7 @@ export default Magno;
 const styles=StyleSheet.create({
     container:{
         margin:10,
+        marginBottom:20,
         alignItems:'center',
         justifyContent:'center',
         flex:1
@@ -62,7 +81,25 @@ const styles=StyleSheet.create({
         margin:10,
         alignItems:'center',
         height:40,
-        width:100,
+        width:120,
+    },
+    button2:{
+        backgroundColor:'grey',
+        justifyContent:'center',
+        borderRadius:10,
+        margin:10,
+        alignItems:'center',
+        height:40,
+        width:120,
+    },
+    button3:{
+        backgroundColor:'black',
+        justifyContent:'center',
+        borderRadius:10,
+        margin:10,
+        alignItems:'center',
+        height:40,
+        width:120,
     },
     chart_containeer:{
         marginTop:20,
