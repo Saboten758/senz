@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { processColor,ScrollView,StyleSheet, Text, TouchableHighlight, View } from "react-native";
+import { Dimensions, processColor,ScrollView,StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { accelerometer, setUpdateIntervalForType,SensorTypes } from "react-native-sensors";
 
 import {LineChart} from 'react-native-charts-wrapper';
@@ -7,27 +7,52 @@ import {LineChart} from 'react-native-charts-wrapper';
 setUpdateIntervalForType(SensorTypes.accelerometer, 300);
 
 
+
 const Accel=()=>{
+  
     const [but,setBut]=useState(false)
     const [accel,setAccel]=useState({x:0,y:0,z:0,timestamp:0})
     const [accelDatax, setAccelDatax] = useState([0]);
     const [accelDatay, setAccelDatay] = useState([0]);
     const [accelDataz, setAccelDataz] = useState([0]);
+    const [dim,setDim]=useState(Dimensions.get('window').width)
+    async function resizer(event) {
+      const { width } = event.nativeEvent.layout;
+        setDim(width);
+    }
+      resizer
 
+    useEffect(()=>{
+      const handleScreenResize =async () => {
+        const width = Dimensions.get("window").width;
+        setDim(width);
+      };
+      Dimensions.addEventListener("change", handleScreenResize);
+  
+    },[])
 
     useEffect(() => {
         const subscription = accelerometer.subscribe(({ x, y, z, timestamp }) => {
           if(but){
-            setAccel({ x, y, z, timestamp });
-            setAccelDatax((prevData) => [...prevData, x]);
-            setAccelDatay((prevData) => [...prevData, y]);
-            setAccelDataz((prevData) => [...prevData, z]);
+            const netAcceleration = {
+              x: Number(x.toFixed(3)) - 0,
+              y: Number(y.toFixed(3)) - 0,
+              z: Number((z - 9.81).toFixed(3)),  //gravity accel =9.81 ig :>
+              x_unfix:x-0,
+              y_unfix:y-0,
+              z_unfix:z-9.81,
+            };
+            setAccel({ x:netAcceleration.x, y:netAcceleration.y, z:netAcceleration.z, timestamp });
+            setAccelDatax((prevData) => [...prevData, netAcceleration.x_unfix]);
+            setAccelDatay((prevData) => [...prevData, netAcceleration.y_unfix]);
+            setAccelDataz((prevData) => [...prevData, netAcceleration.z_unfix]);
           } 
         });
         
         return () => {
           subscription.unsubscribe(); 
         };
+          
       }, [but]);
 
 
@@ -36,7 +61,7 @@ const Accel=()=>{
             <View style={styles.container}>
                 <View style={styles.chart_containeer}>
                 <LineChart
-            style={styles.chart}
+            style={[styles.chart, { width: dim }]}
             data={{
               dataSets: [{ label: "ACCEL_X", values: accelDatax.map((xVal, index) => ({ y: xVal, x: index })), config: {lineWidth: 4}},
               { label: "ACCEL_Y", values: accelDatay.map((yVal, index) => ({ y: yVal, x: index })), config: {lineWidth: 4,color:processColor('red')}},
@@ -47,8 +72,8 @@ const Accel=()=>{
                 </View>
            
             <Text style={styles.text}>ACCEL_x: {accel.x}</Text>
-                 <Text style={styles.text}>ACCEL_y: {accel.x}</Text>
-                <Text style={styles.text}>ACCEL_z: {accel.x}</Text>
+                 <Text style={styles.text}>ACCEL_y: {accel.y}</Text>
+                <Text style={styles.text}>ACCEL_z: {accel.z}</Text>
                <Text style={styles.text}>TIMESTAMP: {accel.timestamp}</Text>
               <TouchableHighlight style={!but?styles.button:styles.button2}onPress={()=>{setBut(!but)}}><Text style={{color:'white'}}>{!but?"Start Logging":"Stop Logging"}</Text></TouchableHighlight> 
               <TouchableHighlight style={styles.button3}onPress={()=>{
@@ -106,10 +131,10 @@ const styles=StyleSheet.create({
         alignItems:'center',
         justifyContent:'center',
         flex:1,
+        
     },
     chart: {
         flex: 1,
         height:500,
-        width:500
       }
 })

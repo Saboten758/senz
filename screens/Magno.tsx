@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { processColor,ScrollView,StyleSheet, Text, TouchableHighlight, View } from "react-native";
+import { Dimensions, processColor,ScrollView,StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { magnetometer, setUpdateIntervalForType,SensorTypes } from "react-native-sensors";
 
 import {LineChart} from 'react-native-charts-wrapper';
@@ -13,12 +13,25 @@ const Magno=()=>{
     const [magnoDatax, setmagnoDatax] = useState([0]);
     const [magnoDatay, setmagnoDatay] = useState([0]);
     const [magnoDataz, setmagnoDataz] = useState([0]);
+    const [width,setWidth]=useState(Dimensions.get('window').width)
 
+    useEffect(()=>{
+      const handle=async()=>{
+          const width=Dimensions.get('window').width;
+          setWidth(width);
+      }
+      Dimensions.addEventListener('change',handle);
+    })
 
     useEffect(() => {
         const subscription = magnetometer.subscribe(({ x, y, z, timestamp }) => {
           if(but){
-            setmagno({ x, y, z, timestamp });
+            const corrected={
+              x:Number(x.toFixed(3)),
+              y:Number(y.toFixed(3)),
+              z:Number(z.toFixed(3)),
+            }
+            setmagno({ x:corrected.x, y:corrected.y, z:corrected.z, timestamp });
             setmagnoDatax((prevData) => [...prevData, x]);
             setmagnoDatay((prevData) => [...prevData, y]);
             setmagnoDataz((prevData) => [...prevData, z]);
@@ -36,19 +49,19 @@ const Magno=()=>{
             <View style={styles.container}>
                 <View style={styles.chart_containeer}>
                 <LineChart
-            style={styles.chart}
+            style={[styles.chart,{width:width}]}
             data={{
-              dataSets: [{ label: "magno_X", values: magnoDatax.map((xVal, index) => ({ y: xVal, x: index })), config: {lineWidth: 4}},
-              { label: "magno_Y", values: magnoDatay.map((yVal, index) => ({ y: yVal, x: index })), config: {lineWidth: 4,color:processColor('red')}},
-              { label: "magno_Z", values: magnoDataz.map((zVal, index) => ({ y: zVal, x: index })), config: {lineWidth: 4,color:processColor('green')}}
+              dataSets: [{ label: "MAGNO_X", values: magnoDatax.map((xVal, index) => ({ y: xVal, x: index })), config: {lineWidth: 4}},
+              { label: "MAGNO_Y", values: magnoDatay.map((yVal, index) => ({ y: yVal, x: index })), config: {lineWidth: 4,color:processColor('red')}},
+              { label: "MAGNO_Z", values: magnoDataz.map((zVal, index) => ({ y: zVal, x: index })), config: {lineWidth: 4,color:processColor('green')}}
             ],
             }}
           />
                 </View>
            
-            <Text style={styles.text}>magno_x: {magno.x}</Text>
-                 <Text style={styles.text}>magno_y: {magno.x}</Text>
-                <Text style={styles.text}>magno_z: {magno.x}</Text>
+            <Text style={styles.text}>MAGNO_X: {magno.x}</Text>
+                 <Text style={styles.text}>MAGNO_Y: {magno.y}</Text>
+                <Text style={styles.text}>MAGNO_Z: {magno.z}</Text>
                <Text style={styles.text}>TIMESTAMP: {magno.timestamp}</Text>
               <TouchableHighlight style={!but?styles.button:styles.button2}onPress={()=>{setBut(!but)}}><Text style={{color:'white'}}>{!but?"Start Logging":"Stop Logging"}</Text></TouchableHighlight> 
               <TouchableHighlight style={styles.button3}onPress={()=>{
@@ -110,6 +123,5 @@ const styles=StyleSheet.create({
     chart: {
         flex: 1,
         height:500,
-        width:500
       }
 })

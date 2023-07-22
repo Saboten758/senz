@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { processColor,ScrollView,StyleSheet, Text, TouchableHighlight, View } from "react-native";
+import { Dimensions, processColor,ScrollView,StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { gyroscope, setUpdateIntervalForType,SensorTypes } from "react-native-sensors";
 
 import {LineChart} from 'react-native-charts-wrapper';
@@ -13,12 +13,25 @@ const Gyro=()=>{
     const [gyroDatax, setgyroDatax] = useState([0]);
     const [gyroDatay, setgyroDatay] = useState([0]);
     const [gyroDataz, setgyroDataz] = useState([0]);
+    const [width,setWidth]=useState(Dimensions.get('window').width);
 
+    useEffect(()=>{
+      const handle=async()=>{
+        const width=Dimensions.get('window').width;
+        setWidth(width);      
+      }
+      Dimensions.addEventListener('change',handle);
+    },[])
 
     useEffect(() => {
         const subscription = gyroscope.subscribe(({ x, y, z, timestamp }) => {
           if(but){
-            setgyro({ x, y, z, timestamp });
+            const corrected={
+              x:Number(x.toFixed(3)),
+              y:Number(y.toFixed(3)),
+              z:Number(z.toFixed(3)),
+            }
+            setgyro({ x:corrected.x, y:corrected.y, z:corrected.z, timestamp });
             setgyroDatax((prevData) => [...prevData, x]);
             setgyroDatay((prevData) => [...prevData, y]);
             setgyroDataz((prevData) => [...prevData, z]);
@@ -36,7 +49,7 @@ const Gyro=()=>{
             <View style={styles.container}>
                 <View style={styles.chart_containeer}>
                 <LineChart
-            style={styles.chart}
+            style={[styles.chart,{width:width}]}
             data={{
               dataSets: [{ label: "GYRO_X", values: gyroDatax.map((xVal, index) => ({ y: xVal, x: index })), config: {lineWidth: 4}},
               { label: "GYRO_Y", values: gyroDatay.map((yVal, index) => ({ y: yVal, x: index })), config: {lineWidth: 4,color:processColor('red')}},
@@ -47,8 +60,8 @@ const Gyro=()=>{
                 </View>
            
             <Text style={styles.text}>GYRO_X: {gyro.x}</Text>
-                 <Text style={styles.text}>GYRO_Y: {gyro.x}</Text>
-                <Text style={styles.text}>GYRO_Y: {gyro.x}</Text>
+                 <Text style={styles.text}>GYRO_Y: {gyro.y}</Text>
+                <Text style={styles.text}>GYRO_Y: {gyro.z}</Text>
                <Text style={styles.text}>TIMESTAMP: {gyro.timestamp}</Text>
               <TouchableHighlight style={!but?styles.button:styles.button2}onPress={()=>{setBut(!but)}}><Text style={{color:'white'}}>{!but?"Start Logging":"Stop Logging"}</Text></TouchableHighlight> 
               <TouchableHighlight style={styles.button3}onPress={()=>{
