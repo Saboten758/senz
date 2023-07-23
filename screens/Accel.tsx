@@ -23,7 +23,6 @@ const Accel=()=>{
 
     const save = async () => {
       const filePath = `${RNFS.DocumentDirectoryPath}/accel_data.csv`; 
-        console.log(RNFS.DocumentDirectoryPath);
       try {
 
         const csvData = accelDatax.map((xVal, index) => {

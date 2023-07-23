@@ -35,7 +35,7 @@ const Files = () => {
       fileList.forEach(async (file) => {
         await RNFS.unlink(`${path}/${file.name}`);
       });
-      showInfo();
+      showInfo(); 
       loadFiles(); 
     } catch (error) {
       console.log('Error deleting files:', error);

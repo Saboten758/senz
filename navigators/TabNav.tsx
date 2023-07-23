@@ -6,6 +6,8 @@ import Magno from "../screens/Magno";
 import Gyro from "../screens/Gyro";
 import CustomTabBar from "./CustomTab";
 import Files from "../screens/Files";
+import More from "../screens/More";
+import Cont from "../screens/Contact";
 
 const Tab = createBottomTabNavigator();
 const TabNavigator = () => {
@@ -19,6 +21,8 @@ const TabNavigator = () => {
       <Tab.Screen name="Magno" component={Magno} />
       <Tab.Screen name="Gyro" component={Gyro} />
       <Tab.Screen name="Files" component={Files} />
+      <Tab.Screen name="More" component={More} />
+      <Tab.Screen name="Contact" component={Cont} />
     </Tab.Navigator>
   );
 };
