@@ -37,6 +37,7 @@ const styles=StyleSheet.create({
         width:300,
         padding:10,
         justifyContent:'center',
+        elevation:3,
     },
     card2:
     {
@@ -47,6 +48,7 @@ const styles=StyleSheet.create({
         height:300,
         width:300,
         padding:10,
+        elevation:3,
         justifyContent:'center',
     },
     texting:{

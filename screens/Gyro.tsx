@@ -1,20 +1,44 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions, processColor,ScrollView,StyleSheet, Text, TouchableHighlight, View } from "react-native";
+import { Dimensions, ToastAndroid,processColor,ScrollView,StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { gyroscope, setUpdateIntervalForType,SensorTypes } from "react-native-sensors";
+import RNFS from 'react-native-fs';
 
 import {LineChart} from 'react-native-charts-wrapper';
 
 setUpdateIntervalForType(SensorTypes.gyroscope, 300);
 
-
 const Gyro=()=>{
+
+  const filepath=`${RNFS.DocumentDirectoryPath}/gyroscope_data.csv`;
+  const showInfo=()=>{
+    ToastAndroid.show(`Gyro Data saved successfully to ${RNFS.DocumentDirectoryPath} `,ToastAndroid.SHORT)
+  }
     const [but,setBut]=useState(false)
     const [gyro,setgyro]=useState({x:0,y:0,z:0,timestamp:0})
     const [gyroDatax, setgyroDatax] = useState([0]);
     const [gyroDatay, setgyroDatay] = useState([0]);
     const [gyroDataz, setgyroDataz] = useState([0]);
     const [width,setWidth]=useState(Dimensions.get('window').width);
+    const[timing,setTiming]=useState([0]);
 
+    const save=async()=>{
+        try{
+            const csvData=gyroDatax.map((xVal,index)=>{
+              const timestamp=timing[index];
+              const yVal=gyroDatay[index];
+              const zVal=gyroDataz[index];
+              return `${timestamp},${xVal},${yVal},${zVal}`;
+            })
+            const csvString="Timestamp,xVal,yVal,zVal\n"+csvData.join('\n');
+            RNFS.writeFile(filepath,csvString,"utf8");
+            showInfo();
+        }
+        catch(e){
+          console.log(e);
+        }
+
+    }
+    
     useEffect(()=>{
       const handle=async()=>{
         const width=Dimensions.get('window').width;
@@ -35,6 +59,7 @@ const Gyro=()=>{
             setgyroDatax((prevData) => [...prevData, x]);
             setgyroDatay((prevData) => [...prevData, y]);
             setgyroDataz((prevData) => [...prevData, z]);
+            setTiming((prev)=>[...prev,timestamp]);
           } 
         });
         
@@ -64,11 +89,14 @@ const Gyro=()=>{
                 <Text style={styles.text}>GYRO_Y: {gyro.z}</Text>
                <Text style={styles.text}>TIMESTAMP: {gyro.timestamp}</Text>
               <TouchableHighlight style={!but?styles.button:styles.button2}onPress={()=>{setBut(!but)}}><Text style={{color:'white'}}>{!but?"Start Logging":"Stop Logging"}</Text></TouchableHighlight> 
+              <View style={{flexDirection:'row'}}>
               <TouchableHighlight style={styles.button3}onPress={()=>{
                 setgyro({x:0,y:0,z:0,timestamp:0});setgyroDatax([0]);setgyroDatay([0]);setgyroDataz([0]);
                 }}>
                     <Text style={{color:'white'}}>CLEAR</Text>
                 </TouchableHighlight> 
+                <TouchableHighlight onPress={save}style={styles.button4}><Text>SAVE</Text></TouchableHighlight>
+              </View>
          </View>
         </ScrollView>
             
@@ -124,5 +152,14 @@ const styles=StyleSheet.create({
         flex: 1,
         height:500,
         width:500
-      }
+      },
+      button4:{
+        backgroundColor:'#666699',
+        justifyContent:'center',
+        borderRadius:10,
+        margin:10,
+        alignItems:'center',
+        height:40,
+        width:120,
+    },
 })

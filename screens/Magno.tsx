@@ -1,19 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions, processColor,ScrollView,StyleSheet, Text, TouchableHighlight, View } from "react-native";
+import { Dimensions,ToastAndroid, processColor,ScrollView,StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { magnetometer, setUpdateIntervalForType,SensorTypes } from "react-native-sensors";
-
+import RNFS from 'react-native-fs';
 import {LineChart} from 'react-native-charts-wrapper';
 
 setUpdateIntervalForType(SensorTypes.magnetometer, 300);
 
 
 const Magno=()=>{
+
+    const filePath=`${RNFS.DocumentDirectoryPath}/magno_data.csv`;
+
+    const showInfo=()=>{
+      ToastAndroid.show(`Magno Data saved successfully to ${RNFS.DocumentDirectoryPath} `,ToastAndroid.SHORT)
+    }
     const [but,setBut]=useState(false)
     const [magno,setmagno]=useState({x:0,y:0,z:0,timestamp:0})
     const [magnoDatax, setmagnoDatax] = useState([0]);
     const [magnoDatay, setmagnoDatay] = useState([0]);
     const [magnoDataz, setmagnoDataz] = useState([0]);
     const [width,setWidth]=useState(Dimensions.get('window').width)
+    const [timing,setTiming]=useState([0])
 
     useEffect(()=>{
       const handle=async()=>{
@@ -35,6 +42,7 @@ const Magno=()=>{
             setmagnoDatax((prevData) => [...prevData, x]);
             setmagnoDatay((prevData) => [...prevData, y]);
             setmagnoDataz((prevData) => [...prevData, z]);
+            setTiming((prev)=>[...prev,timestamp]);
           } 
         });
         
@@ -43,7 +51,22 @@ const Magno=()=>{
         };
       }, [but]);
 
-
+    const save=async()=>{
+        try{
+            const csvString=magnoDatax.map((xVal,index)=>{
+              const timestamp=timing[index];
+              const yVal=magnoDatay[index];
+              const zVal=magnoDataz[index];
+              return `${timestamp},${xVal},${yVal},${zVal}`
+            })
+            const csvData="Timestamp,xVal,yVal,zVal\n"+csvString.join('\n');
+            RNFS.writeFile(filePath,csvData,'utf8');
+            showInfo();
+        }
+        catch(e){
+          console.log(e);
+        }
+    }
     return(
         <ScrollView>
             <View style={styles.container}>
@@ -64,11 +87,14 @@ const Magno=()=>{
                 <Text style={styles.text}>MAGNO_Z: {magno.z}</Text>
                <Text style={styles.text}>TIMESTAMP: {magno.timestamp}</Text>
               <TouchableHighlight style={!but?styles.button:styles.button2}onPress={()=>{setBut(!but)}}><Text style={{color:'white'}}>{!but?"Start Logging":"Stop Logging"}</Text></TouchableHighlight> 
+              <View style={{flexDirection:'row'}}>
               <TouchableHighlight style={styles.button3}onPress={()=>{
                 setmagno({x:0,y:0,z:0,timestamp:0});setmagnoDatax([0]);setmagnoDatay([0]);setmagnoDataz([0]);
                 }}>
                     <Text style={{color:'white'}}>CLEAR</Text>
                 </TouchableHighlight> 
+                <TouchableHighlight onPress={save}style={styles.button4}><Text>SAVE</Text></TouchableHighlight>
+                </View>
          </View>
         </ScrollView>
             
@@ -123,5 +149,14 @@ const styles=StyleSheet.create({
     chart: {
         flex: 1,
         height:500,
-      }
+      },
+      button4:{
+        backgroundColor:'#666699',
+        justifyContent:'center',
+        borderRadius:10,
+        margin:10,
+        alignItems:'center',
+        height:40,
+        width:120,
+    },
 })

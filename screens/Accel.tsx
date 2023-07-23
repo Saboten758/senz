@@ -1,27 +1,48 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions, processColor,ScrollView,StyleSheet, Text, TouchableHighlight, View } from "react-native";
+import { Dimensions,processColor,ScrollView,StyleSheet, Text, TouchableHighlight,ToastAndroid, View,PermissionsAndroid } from "react-native";
 import { accelerometer, setUpdateIntervalForType,SensorTypes } from "react-native-sensors";
+import RNFS from 'react-native-fs';
 
 import {LineChart} from 'react-native-charts-wrapper';
 
 setUpdateIntervalForType(SensorTypes.accelerometer, 300);
 
 
-
 const Accel=()=>{
-  
-    const [but,setBut]=useState(false)
-    const [accel,setAccel]=useState({x:0,y:0,z:0,timestamp:0})
+    const showInfo=()=>{
+      ToastAndroid.show(`Accel Data saved successfully to ${RNFS.DocumentDirectoryPath} `,ToastAndroid.SHORT)
+    }
+    const [but,setBut]=useState(false);
+    const [accel,setAccel]=useState({x:0,y:0,z:0,timestamp:0});
     const [accelDatax, setAccelDatax] = useState([0]);
     const [accelDatay, setAccelDatay] = useState([0]);
     const [accelDataz, setAccelDataz] = useState([0]);
-    const [dim,setDim]=useState(Dimensions.get('window').width)
-    async function resizer(event) {
-      const { width } = event.nativeEvent.layout;
-        setDim(width);
-    }
-      resizer
+    const [timing,setTiming]=useState([0]);
+    const [dim,setDim]=useState(Dimensions.get('window').width);
 
+
+    const save = async () => {
+      const filePath = `${RNFS.DocumentDirectoryPath}/accel_data.csv`; 
+        console.log(RNFS.DocumentDirectoryPath);
+      try {
+
+        const csvData = accelDatax.map((xVal, index) => {
+          const timestamp = timing[index];
+          const yVal = accelDatay[index];
+          const zVal = accelDataz[index];
+          return `${timestamp},${xVal},${yVal},${zVal}`;
+        });
+    
+        const csvString = "Timestamp,xVal,yVal,zVal\n" + csvData.join("\n");
+    
+        await RNFS.writeFile(filePath, csvString, "utf8");
+    
+        showInfo();
+      } catch (error) {
+        console.log("Error writing data to CSV file:", error);
+      }
+    };
+    
     useEffect(()=>{
       const handleScreenResize =async () => {
         const width = Dimensions.get("window").width;
@@ -46,6 +67,7 @@ const Accel=()=>{
             setAccelDatax((prevData) => [...prevData, netAcceleration.x_unfix]);
             setAccelDatay((prevData) => [...prevData, netAcceleration.y_unfix]);
             setAccelDataz((prevData) => [...prevData, netAcceleration.z_unfix]);
+            setTiming((prev)=>[...prev,timestamp])
           } 
         });
         
@@ -76,11 +98,14 @@ const Accel=()=>{
                 <Text style={styles.text}>ACCEL_z: {accel.z}</Text>
                <Text style={styles.text}>TIMESTAMP: {accel.timestamp}</Text>
               <TouchableHighlight style={!but?styles.button:styles.button2}onPress={()=>{setBut(!but)}}><Text style={{color:'white'}}>{!but?"Start Logging":"Stop Logging"}</Text></TouchableHighlight> 
+              <View style={{flexDirection:'row'}}>
               <TouchableHighlight style={styles.button3}onPress={()=>{
                 setAccel({x:0,y:0,z:0,timestamp:0});setAccelDatax([0]);setAccelDatay([0]);setAccelDataz([0]);
                 }}>
                     <Text style={{color:'white'}}>CLEAR</Text>
                 </TouchableHighlight> 
+                <TouchableHighlight onPress={save}style={styles.button4}><Text>SAVE</Text></TouchableHighlight>
+              </View>
          </View>
         </ScrollView>
             
@@ -126,6 +151,15 @@ const styles=StyleSheet.create({
         height:40,
         width:120,
     },
+    button4:{
+      backgroundColor:'#666699',
+      justifyContent:'center',
+      borderRadius:10,
+      margin:10,
+      alignItems:'center',
+      height:40,
+      width:120,
+  },
     chart_containeer:{
         marginTop:20,
         alignItems:'center',
