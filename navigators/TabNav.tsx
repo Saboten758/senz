@@ -8,6 +8,8 @@ import CustomTabBar from "./CustomTab";
 import Files from "../screens/Files";
 import More from "../screens/More";
 import Cont from "../screens/Contact";
+import ControlAccel from "../screens/ControlAccel";
+import Visualize from "../screens/Visualize";
 
 const Tab = createBottomTabNavigator();
 const TabNavigator = () => {
@@ -17,10 +19,13 @@ const TabNavigator = () => {
       tabBar={(props) => <CustomTabBar {...props} />}
     >
       <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="Accel" component={Accel} />
-      <Tab.Screen name="Magno" component={Magno} />
-      <Tab.Screen name="Gyro" component={Gyro} />
+      {/* <Tab.Screen name="Accel" component={Accel} /> */}
+      <Tab.Screen name="Logger" component={ControlAccel} />
+      
+      {/* <Tab.Screen name="Gyro" component={Gyro} /> */}
       <Tab.Screen name="Files" component={Files} />
+      <Tab.Screen name="Visuals" component={Visualize}/>
+      {/* <Tab.Screen name="Magno" component={Magno} /> */}
       <Tab.Screen name="More" component={More} />
       <Tab.Screen name="Contact" component={Cont} />
     </Tab.Navigator>
