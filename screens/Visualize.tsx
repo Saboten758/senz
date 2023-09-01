@@ -7,8 +7,8 @@ const Visualize=()=>{
         <View style={styles.conatainer}>
             <Text style={styles.txt}>Graph Visualization!</Text>
             <TouchableOpacity onPress={()=>{nav.navigate("Accelerometer")}} style={styles.button3}><Text>Accelerometer</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.button3}><Text>Gyroscope</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.button3}><Text>Magnetometer</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.button3} onPress={()=>{nav.navigate("Gyroscope")}} ><Text>Gyroscope</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.button3} onPress={()=>{nav.navigate("Magnetometer")}} ><Text>Magnetometer</Text></TouchableOpacity>
         </View>
     )
 }

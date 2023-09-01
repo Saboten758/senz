@@ -21,7 +21,7 @@ const Main=()=>{
         }}/>
         <Stack.Screen name="Accelerometer" component={Accel}/> 
         <Stack.Screen name="Gyroscope" component={Gyro}/>
-        <Stack.Screen name="Magnetometers" component={Magno}/>
+        <Stack.Screen name="Magnetometer" component={Magno}/>
         </Stack.Navigator>
     </NavigationContainer>
     )

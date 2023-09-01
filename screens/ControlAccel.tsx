@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View,ToastAndroid,Dimensions, TextInput, Alert, KeyboardAvoidingView} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View,ToastAndroid,Dimensions, TextInput, Alert} from "react-native";
 import { accelerometer,gyroscope, setUpdateIntervalForType,SensorTypes } from "react-native-sensors";
 import RNFS from 'react-native-fs';
 
