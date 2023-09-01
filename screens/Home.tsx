@@ -9,10 +9,10 @@ const Home=()=>{
         </View>
         <View style={{alignItems:'center'}}>
         <View style={styles.card}>
-            <Text style={styles.normal}>Welcome to the enchanting world of mobile phone sensors! These tiny, powerful components act as the mystical guardians of your device, bestowing it with extraordinary abilities. </Text>
+            <Text style={styles.normal}>Welcome to senz. This app aims to log the sensor data from your mobile in a .csv file & also visulize the data in a real time graph!</Text>
         </View>
         <View style={styles.card2}>
-            <Text style={styles.normal2}>These sensors are sophisticated electronic components integrated into your device, meticulously engineered to perceive and measure various environmental stimuli. One such marvel is the gyroscope, a micro-electromechanical system (MEMS) that senses rotational motion, enabling precise orientation detection.  </Text>
+            <Text style={styles.normal2}>These sensors are sophisticated electronic components integrated into your device, meticulously engineered to perceive and measure various environmental stimuli. This app is mainly build for data collection and sharing!  </Text>
         </View>
         </View>
       </ScrollView>
